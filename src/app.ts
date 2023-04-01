@@ -8,11 +8,7 @@ interface JsonRpcRequest {
     id: number | string | null;
     method: string;
     params: any;
-  }
-  
-  interface ExtendedJsonRpcRequest extends JsonRpcRequest {
-    url: string;
-  }
+}
 
 const app = express();
 app.use(bodyParser.json());
@@ -20,18 +16,24 @@ app.use(bodyParser.json());
 app.post('/rpc', async (req, res) => {
   const apiKey = req.query.apikey;
   const requiredApiKey = process.env.API_KEY;
+  const url = process.env.URL;
+
+  if (url === undefined) {
+    res.status(500).send('URL is not defined');
+    return;
+  }
 
   if (apiKey !== requiredApiKey) {
     res.status(401).send('Unauthorized: Invalid API key');
     return;
   }
 
-  const jsonRpcRequest: ExtendedJsonRpcRequest = req.body;
+  const jsonRpcRequest: JsonRpcRequest = req.body;
 
   console.log(jsonRpcRequest)
 
   try {
-    const response = await axios.post(jsonRpcRequest.url, {
+    const response = await axios.post(url, {
       jsonrpc: jsonRpcRequest.jsonrpc,
       id: jsonRpcRequest.id,
       method: jsonRpcRequest.method,
