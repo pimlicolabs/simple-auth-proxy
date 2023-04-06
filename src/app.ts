@@ -3,11 +3,16 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import axios from 'axios';
 
-interface JsonRpcRequest {
-    jsonrpc: string;
-    id: number | string | null;
-    method: string;
-    params: any;
+function getCurrentDateInUTC() {
+  const currentDate = new Date();
+  const year = currentDate.getUTCFullYear();
+  const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(currentDate.getUTCDate()).padStart(2, '0');
+  const hours = String(currentDate.getUTCHours()).padStart(2, '0');
+  const minutes = String(currentDate.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(currentDate.getUTCSeconds()).padStart(2, '0');
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
 }
 
 const app = express();
@@ -28,23 +33,20 @@ app.post('/rpc', async (req, res) => {
     return;
   }
 
-  const jsonRpcRequest: JsonRpcRequest = req.body;
-
-  console.log(jsonRpcRequest)
+  console.log(`${getCurrentDateInUTC()} - request: ${req.body}`)
 
   try {
-    const response = await axios.post(url, {
-      jsonrpc: jsonRpcRequest.jsonrpc,
-      id: jsonRpcRequest.id,
-      method: jsonRpcRequest.method,
-      params: jsonRpcRequest.params,
-    });
+    const response = await axios.post(url, req.body);
+
+    console.log(`${getCurrentDateInUTC()} - result: ${response.data}`)
 
     res.json(response.data);
   } catch (error) {
     if (error instanceof Error) {
+        console.log(`${getCurrentDateInUTC()} - error: ${error.message}`)
         res.status(500).send(`Error forwarding the JSON-RPC request: ${error.message}`);
       } else {
+        console.log(`${getCurrentDateInUTC()} - error: ${error}`)
         res.status(500).send('Error forwarding the JSON-RPC request');
       }  
     }
