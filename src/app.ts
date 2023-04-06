@@ -33,7 +33,7 @@ app.post('/rpc', async (req, res) => {
     return;
   }
 
-  console.log(`${getCurrentDateInUTC()} - request: ${req.body}`)
+  console.log(`${getCurrentDateInUTC()} - request: ${JSON.stringify(req.body)}`)
 
   try {
     const response = await axios.post(url, req.body);
@@ -46,7 +46,7 @@ app.post('/rpc', async (req, res) => {
         console.log(`${getCurrentDateInUTC()} - error: ${JSON.stringify(error.message)}`)
         res.status(500).send(`Error forwarding the JSON-RPC request: ${JSON.stringify(error.message)}`);
       } else {
-        console.log(`${getCurrentDateInUTC()} - error: ${error}`)
+        console.log(`${getCurrentDateInUTC()} - error: ${JSON.stringify(error)}`)
         res.status(500).send('Error forwarding the JSON-RPC request');
       }  
     }
